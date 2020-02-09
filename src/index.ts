@@ -34,6 +34,14 @@ controller.register("updateInterval", updateInterval);
 controller.register("updateScale", updateScale);
 
 const $title = document.getElementById("title");
+const $tempo: HTMLInputElement = document.getElementById(
+  "tempo"
+) as HTMLInputElement;
+const $clear = document.getElementById("clear");
+const $random = document.getElementById("random");
+$clear.addEventListener("click", () => arp.clear());
+$random.addEventListener("click", () => arp.random());
+$title.addEventListener("click", () => form.toggle());
 updateTitle();
 
 let initialized = false;
@@ -69,6 +77,8 @@ function updateInterval(interval: number): void {
 }
 
 document.addEventListener("keydown", e => {
+  const target = e.target as HTMLElement;
+  if (target.tagName && target.tagName === "INPUT") return;
   const code = e.keyCode;
   if (code <= 55 && code >= 49) updateInterval(code - 49);
 });
@@ -97,7 +107,7 @@ function initialize() {
     channels[i].connect(output);
   });
   output.toMaster();
-  Transport.bpm.value = 100;
+  updateTempo();
   Transport.scheduleRepeat((time: string) => {
     const interval = composition.intervals[currentInterval];
     const notes = arp.tick(interval);
@@ -106,6 +116,11 @@ function initialize() {
       if (note) synths[i].triggerAttackRelease(note, "16n", time);
     });
   }, "16n");
+  $tempo.addEventListener("input", updateTempo);
 
   initialized = true;
+}
+
+function updateTempo() {
+  Transport.bpm.value = parseInt($tempo.value) || 100;
 }

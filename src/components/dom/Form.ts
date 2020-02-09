@@ -8,10 +8,11 @@ export default class Form {
   readonly $form: HTMLElement;
   readonly composition: Composition;
   readonly controller: Controller;
-  readonly $root: HTMLSelectElement;
   readonly $mode: HTMLSelectElement;
-  root: RootType;
+  readonly $root: HTMLSelectElement;
   mode: ModeType;
+  open: boolean = false;
+  root: RootType;
 
   constructor(
     form: HTMLElement,
@@ -30,6 +31,11 @@ export default class Form {
 
   updateScale() {
     this.controller.methods.updateScale(this.root, this.mode);
+  }
+
+  toggle() {
+    this.open = !this.open;
+    this.$form.classList.toggle("open");
   }
 
   loadDOM() {

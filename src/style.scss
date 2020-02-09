@@ -54,7 +54,7 @@ body {
       display: block;
     }
     &:before {
-      color: black;
+      color: $c-on;
       text-align: center;
       text-transform: uppercase;
       display: flex;
@@ -62,35 +62,37 @@ body {
       justify-content: center;
       flex-direction: column;
       border-radius: $corner;
-      background: $c-off-d;
+      border: $border solid $c-on;
     }
   }
   button {
     border: 1px solid $c-off;
-    opacity: 0.5;
-    transition: opacity 70ms ease-in-out;
-    padding: 0;
     height: 2rem;
+    padding: 0;
+    position: relative;
+    &,
     &:focus {
       background: transparent;
     }
     &.state-1 {
+      background: currentColor;
       &,
       &:focus {
-        background: $c-off;
+        color: $c-off;
       }
     }
     &.state-2 {
+      background: currentColor;
       &,
       &:focus {
         border: 1px solid $c-on;
-        background: $c-on;
+        color: $c-on;
       }
     }
   }
   @for $i from 1 through $n {
     &.active-#{$i} button:nth-child(#{$i}) {
-      opacity: 1;
+      box-shadow: 0px 0px 0px $border currentColor;
     }
   }
   #arp-0:before {
@@ -108,7 +110,7 @@ body {
   #arp-3 {
     margin-top: 0.5rem;
     padding-top: 0.5rem;
-    border-top: $border solid $c-off;
+    border-top: $border solid $c-on;
   }
 }
 
@@ -193,13 +195,31 @@ body {
             -45deg,
             transparent,
             transparent $border * 2,
-            $c-off-d $border * 2,
-            $c-off-d $border * 3
+            $c-off $border * 2,
+            $c-off $border * 3
           ),
           black;
       }
       &:not(.on)::before {
         border-color: $c-off-d;
+        background: repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent $border * 2,
+            $c-off-d $border * 2,
+            $c-off-d $border * 3
+          ),
+          black;
+      }
+      &.active::before {
+        background: repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent $border * 2,
+            $c-on $border * 2,
+            $c-on $border * 3
+          ),
+          black;
       }
       &::after {
         bottom: calc(#{(100% - $h) * 0.5} + #{$corner});
@@ -213,11 +233,22 @@ body {
   }
 }
 
-#title {
+.title-container {
   text-align: center;
+}
+#title {
+  cursor: pointer;
   font-size: 1.5rem;
+  text-align: center;
+  padding: 0.5rem;
+  display: inline-block;
+  width: auto;
+  &:hover {
+    color: $c-off;
+  }
 }
 
+input,
 button {
   appearance: none;
   background: black;
@@ -248,9 +279,23 @@ button {
   }
 }
 
+#tempo {
+  display: inline-block;
+  width: auto;
+}
 #options {
-  #root,
-  #mode {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 250ms ease-in-out, padding 250ms ease-in-out;
+  &.open {
+    padding: $border 0;
+    max-height: 408px + $border * 2;
+    @media (min-width: $kb-w) {
+      max-height: 340px + $border * 2;
+    }
+  }
+  margin-top: 0;
+  > div {
     display: flex;
     flex-wrap: wrap;
     align-content: center;
@@ -260,7 +305,7 @@ button {
       margin: 0.5rem;
     }
   }
-  #mode {
+  > div + div {
     margin-top: 1rem;
   }
   #root button {
@@ -271,6 +316,14 @@ button {
   }
   #mode button {
     width: calc(33.33% - 1rem);
+  }
+  .controls {
+    button {
+      margin: 0;
+    }
+    div + div {
+      margin-left: 1rem;
+    }
   }
 }
 

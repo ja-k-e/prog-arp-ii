@@ -27,6 +27,31 @@ export default class Arp {
     this.build();
   }
 
+  clear() {
+    this.pattern = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      // bass
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+    this.updateDOM();
+  }
+
+  random() {
+    const r = () => (Math.random() > 0.5 ? 0 : Math.random() > 0.5 ? 1 : 2);
+    const row = [];
+    for (let i = 0; i < 12; i++) row.push(Math.random() > 0.1 ? r() : 9);
+    this.pattern = [
+      row.map(a => (a === 0 ? (Math.random() > 0.5 ? 1 : 2) : 0)),
+      row.map(a => (a === 1 ? (Math.random() > 0.5 ? 1 : 2) : 0)),
+      row.map(a => (a === 2 ? (Math.random() > 0.5 ? 1 : 2) : 0)),
+      // bass
+      [r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r()]
+    ];
+    this.updateDOM();
+  }
+
   build() {
     this.$.forEach((row, i) => {
       for (let j = 0; j < 12; j++) {
@@ -37,6 +62,14 @@ export default class Arp {
           $btn.classList.add(`state-${this.pattern[i][j]}`);
         row.appendChild($btn);
       }
+    });
+  }
+  updateDOM() {
+    this.$.forEach((row, i) => {
+      const $all = row.querySelectorAll("button");
+      $all.forEach(
+        ($btn, j) => ($btn.className = `state-${this.pattern[i][j]}`)
+      );
     });
   }
 

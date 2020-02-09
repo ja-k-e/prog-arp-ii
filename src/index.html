@@ -12,7 +12,6 @@
   </head>
   <body>
     <section>
-      <h1 id="title">&nbsp;</h1>
       <div id="intervals"></div>
 
       <div id="arp">
@@ -22,7 +21,25 @@
         <div id="arp-3"></div>
       </div>
 
+      <div class="title-container">
+        <h1 id="title">&nbsp;</h1>
+      </div>
       <div id="options">
+        <div class="controls">
+          <div>
+            BPM&nbsp;&nbsp;
+            <input
+              id="tempo"
+              type="number"
+              min="0"
+              max="1000"
+              value="100"
+              step="1"
+            />
+          </div>
+          <div><button id="clear">Clear</button></div>
+          <div><button id="random">Random</button></div>
+        </div>
         <div id="root"></div>
         <div id="mode"></div>
       </div>
