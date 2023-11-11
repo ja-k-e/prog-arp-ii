@@ -1,5 +1,6 @@
 import Composition from "./components/composer/Composition";
 import Controller from "./components/controller/Controller";
+import { MIDI, MIDIEvent } from "./components/controller/MIDI";
 import Keyboard from "./components/dom/Keyboard";
 import Arp from "./components/dom/Arp";
 import Form from "./components/dom/Form";
@@ -7,8 +8,10 @@ import { Intervals } from "./components/dom/Intervals";
 import { RootType, ModeType } from "./types/index";
 import accidentals from "./util/accidentals";
 
-const { context, Gain, Synth, Transport } = window.Tone;
 console.clear();
+
+const { context, Gain, AMSynth, FMSynth, Transport } = window.Tone;
+const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 document.documentElement.addEventListener("mousedown", () => {
   if (context.state !== "running") context.resume();
@@ -46,6 +49,13 @@ updateTitle();
 let initialized = false;
 let currentInterval = 0;
 let last: number | null = null;
+let leadOn = false;
+let noteIdx = 0;
+let lead1: typeof AMSynth | undefined;
+let lead2: typeof AMSynth | undefined;
+
+const midi = new MIDI(onMidiEvent);
+midi.initialize().then(() => console.log("MIDI Initialized"));
 
 function updateScale(root: RootType, mode: ModeType): void {
   composition.updateScale(root, mode);
@@ -66,20 +76,29 @@ function updateInterval(interval: number): void {
   if (last === null) {
     Transport.start();
     last = interval;
+    lead1.triggerRelease();
+    lead2.triggerRelease();
+    leadOn = false;
   } else if (interval === last) {
     Transport.stop();
     setTimeout(clear, 50);
     last = null;
-  } else last = interval;
+    lead1.triggerRelease();
+    lead2.triggerRelease();
+    leadOn = false;
+  } else {
+    last = interval;
+    lead2Update();
+  }
   currentInterval = interval;
   intervals.handleActiveIntervalChange(currentInterval);
 }
 
-document.addEventListener("keydown", e => {
+document.addEventListener("keydown", (e) => {
   const target = e.target as HTMLElement;
   if (target.tagName && target.tagName === "INPUT") return;
-  const code = e.keyCode;
-  if (code <= 55 && code >= 49) updateInterval(code - 49);
+  const match = e.code.match(/Digit([1-7])/);
+  if (match) updateInterval(parseInt(match[1]) - 1);
 });
 
 function clear() {
@@ -89,23 +108,33 @@ function clear() {
 
 function initialize() {
   const synths = [
-    new Synth({ oscillator: { type: "sine4" } }),
-    new Synth({ oscillator: { type: "sine4" } }),
-    new Synth({ oscillator: { type: "sine4" } }),
-    new Synth({ oscillator: { type: "sawtooth8" } })
+    new AMSynth({ oscillator: { type: "triangle4" } }),
+    new AMSynth({ oscillator: { type: "triangle4" } }),
+    new AMSynth({ oscillator: { type: "triangle4" } }),
+    new AMSynth({ oscillator: { type: "sawtooth4" } }),
   ];
   const channels = [
     new Gain(0.15),
     new Gain(0.15),
     new Gain(0.15),
-    new Gain(0.6)
+    new Gain(0.8),
   ];
   const output = new Gain();
+  lead1 = new AMSynth();
+  lead2 = new AMSynth();
+  lead1.set({ oscillator: { type: "sawtooth4" }, portamento: 0.5 });
+  lead2.set({ oscillator: { type: "sawtooth4" }, portamento: 0.6 });
+  const lead1Gain = new Gain(0.2);
+  const lead2Gain = new Gain(0.2);
+  lead1.connect(lead1Gain);
+  lead2.connect(lead2Gain);
+  lead1Gain.connect(output);
+  lead2Gain.connect(output);
   synths.forEach((synth, i) => {
     synth.connect(channels[i]);
     channels[i].connect(output);
   });
-  output.toMaster();
+  output.toDestination();
   updateTempo();
   Transport.scheduleRepeat((time: string) => {
     const interval = composition.intervals[currentInterval];
@@ -118,6 +147,43 @@ function initialize() {
   $tempo.addEventListener("input", updateTempo);
 
   initialized = true;
+}
+
+function onMidiEvent({ type, a, b }: MIDIEvent) {
+  if (type === "note_on") {
+    const { value: noteNum } = a;
+    if (noteNum >= 36 && noteNum <= 42) {
+      updateInterval(noteNum - 36);
+    } else if (lead1 && noteNum >= 48 && noteNum <= 74) {
+      const index = noteNum - 48;
+      noteIdx = index % 12;
+      const note = notes[noteIdx];
+      const octave = 3 + Math.floor(index / 12);
+      lead2Update();
+      if (leadOn) {
+        lead1.setNote(`${note}${octave}`);
+      } else {
+        leadOn = true;
+        lead1.triggerAttack(`${note}${octave}`);
+      }
+    }
+  }
+}
+
+function lead2Update() {
+  const index = composition.intervals[currentInterval].triad.notes
+    .map(({ note: { name } }) => {
+      const i = notes.indexOf(name);
+      return [i, Math.abs(noteIdx - i)];
+    })
+    .sort((a, b) => b[1] - a[1])[0][0];
+  const note = notes[index];
+  const octave = 3;
+  if (leadOn) {
+    lead2.setNote(`${note}${octave}`);
+  } else {
+    lead2.triggerAttack(`${note}${octave}`);
+  }
 }
 
 function updateTempo() {
