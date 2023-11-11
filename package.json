@@ -1,7 +1,6 @@
 {
   "name": "prog-arp-ii",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "source": "src/index.html",
   "scripts": {
