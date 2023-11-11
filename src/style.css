@@ -1,0 +1,341 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+button,
+select,
+input {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+section {
+  width: 95%;
+  max-width: 800px;
+  margin: 4rem auto;
+}
+section > * + * {
+  margin-top: 2rem;
+}
+@media (min-width: 800px) {
+  section > * + * {
+    margin-top: 4rem;
+  }
+}
+
+body {
+  background: black;
+  color: white;
+}
+
+#arp > * {
+  display: flex;
+  margin: 0.5rem -0.25rem;
+}
+#arp > *:before,
+#arp > * > * {
+  width: calc(7.6923076923% - 0.5rem);
+  margin: 0.125rem 0.25rem;
+  display: block;
+}
+#arp > *:before {
+  color: white;
+  text-align: center;
+  text-transform: uppercase;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  flex-direction: column;
+  border-radius: 5px;
+  border: 2px solid white;
+}
+#arp button {
+  border: 1px solid hotpink;
+  height: 2rem;
+  padding: 0;
+  position: relative;
+}
+#arp button, #arp button:focus {
+  background: transparent;
+}
+#arp button.state-1 {
+  background: currentColor;
+}
+#arp button.state-1, #arp button.state-1:focus {
+  color: hotpink;
+}
+#arp button.state-2 {
+  background: currentColor;
+}
+#arp button.state-2, #arp button.state-2:focus {
+  border: 1px solid white;
+  color: white;
+}
+#arp.active-1 button:nth-child(1) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-2 button:nth-child(2) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-3 button:nth-child(3) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-4 button:nth-child(4) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-5 button:nth-child(5) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-6 button:nth-child(6) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-7 button:nth-child(7) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-8 button:nth-child(8) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-9 button:nth-child(9) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-10 button:nth-child(10) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-11 button:nth-child(11) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp.active-12 button:nth-child(12) {
+  box-shadow: 0px 0px 0px 2px currentColor;
+}
+#arp #arp-0:before {
+  content: "5";
+}
+#arp #arp-1:before {
+  content: "3";
+}
+#arp #arp-2:before {
+  content: "1";
+}
+#arp #arp-3:before {
+  content: "B";
+}
+#arp #arp-3 {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 2px solid white;
+}
+
+.kb {
+  height: 93.3333333333px;
+  width: 100%;
+  display: flex;
+}
+@media (min-width: 800px) {
+  .kb {
+    height: 133.3333333333px;
+  }
+}
+.kb > kbd {
+  display: block;
+  height: 100%;
+  width: 5.5555555556%;
+  position: relative;
+}
+.kb > kbd.c1, .kb > kbd.c2 {
+  box-sizing: initial;
+}
+.kb > kbd, .kb > kbd::before, .kb > kbd::after {
+  box-sizing: border-box;
+}
+.kb > kbd::before {
+  content: "";
+  height: 100%;
+  width: 80%;
+  background: black;
+  display: block;
+  border: 2px solid hotpink;
+  border-radius: 5px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateZ(0);
+  transition: border-color 100ms ease-in-out;
+}
+.kb > kbd:not(.on)::before {
+  border-color: #36001b;
+}
+.kb > kbd.active::before {
+  border-color: white;
+}
+.kb > kbd::after {
+  content: "";
+  position: absolute;
+  border-radius: 2.5px;
+  width: 50%;
+  left: 25%;
+  height: 10px;
+  display: block;
+  border: 2px solid transparent;
+  bottom: 5px;
+}
+.kb > kbd.arp-harm::after {
+  border-color: white;
+}
+.kb > kbd.arp-harm.high::after {
+  background: white;
+}
+.kb > kbd.arp-harm::after {
+  bottom: auto;
+  top: 5px;
+}
+.kb > kbd[class*=s] {
+  z-index: 9;
+  width: 4.4444444444%;
+  margin: 0 -2.2222222222%;
+}
+.kb > kbd[class*=s]::before {
+  height: 60%;
+  background: repeating-linear-gradient(-45deg, transparent, transparent 4px, hotpink 4px, hotpink 6px), black;
+}
+.kb > kbd[class*=s]:not(.on)::before {
+  border-color: #36001b;
+  background: repeating-linear-gradient(-45deg, transparent, transparent 4px, #36001b 4px, #36001b 6px), black;
+}
+.kb > kbd[class*=s].active::before {
+  background: repeating-linear-gradient(-45deg, transparent, transparent 4px, white 4px, white 6px), black;
+}
+.kb > kbd[class*=s]::after {
+  bottom: calc(20% + 5px);
+}
+.kb > kbd[class*=s].arp-harm::after {
+  top: calc(20% + 5px);
+}
+
+.title-container {
+  text-align: center;
+}
+
+#title {
+  cursor: pointer;
+  font-size: 1.5rem;
+  text-align: center;
+  padding: 0.5rem;
+  display: inline-block;
+  width: auto;
+}
+#title:hover {
+  color: hotpink;
+}
+
+input,
+button {
+  appearance: none;
+  background: black;
+  color: hotpink;
+  padding: 8px 12px;
+  border: 2px solid hotpink;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  text-align: center;
+  width: 100%;
+  display: block;
+  user-select: none;
+  cursor: pointer;
+}
+@media (min-width: 800px) {
+  input,
+  button {
+    font-size: 1rem;
+  }
+}
+input:focus,
+button:focus {
+  outline: none;
+}
+input:focus,
+button:focus {
+  box-shadow: 0px 0px 0px 2px hotpink;
+}
+input.active,
+button.active {
+  background-color: white;
+  border-color: white;
+  color: black;
+}
+
+#tempo {
+  display: inline-block;
+  width: auto;
+}
+
+#options {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 250ms ease-in-out, padding 250ms ease-in-out;
+  margin-top: 0;
+}
+#options.open {
+  padding: 2px 0;
+  max-height: 412px;
+}
+@media (min-width: 800px) {
+  #options.open {
+    max-height: 344px;
+  }
+}
+#options > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  margin: 0 -0.5rem;
+}
+#options > div button {
+  margin: 0.5rem;
+}
+#options > div + div {
+  margin-top: 1rem;
+}
+#options #root button {
+  width: calc(25% - 1rem);
+}
+@media (min-width: 800px) {
+  #options #root button {
+    width: calc(100%/6 - 1rem);
+  }
+}
+#options #mode button {
+  width: calc(33.33% - 1rem);
+}
+#options .controls button {
+  margin: 0;
+}
+#options .controls div + div {
+  margin-left: 1rem;
+}
+
+#intervals {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+  align-content: center;
+  justify-content: center;
+}
+#intervals button {
+  width: 20%;
+  position: relative;
+  margin: 0.5rem;
+}
+@media (min-width: 800px) {
+  #intervals button {
+    width: calc(14.2857142857% - 1rem);
+  }
+}
+#intervals button span:last-child {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8em;
+  font-weight: bold;
+}

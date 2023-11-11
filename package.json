@@ -3,24 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^13.5.0",
-    "copy-webpack-plugin": "^5.1.1",
-    "css-loader": "^3.4.2",
-    "node-sass": "^4.13.1",
-    "sass-loader": "^8.0.2",
-    "style-loader": "^1.1.3",
-    "ts-loader": "^6.2.1",
-    "typescript": "^3.7.5",
-    "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10"
-  },
-  "dependencies": {
-    "tone": "^13.8.25"
-  },
+  "source": "src/index.html",
   "scripts": {
-    "build": "yarn webpack --mode=production",
-    "start": "yarn webpack --watch --mode=development",
-    "serve": "simplehttpserver"
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "parcel": "^2.10.2",
+    "typescript": "^3.7.5"
   }
 }

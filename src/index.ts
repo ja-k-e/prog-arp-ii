@@ -1,5 +1,3 @@
-import "./style.scss";
-const { context, Gain, Synth, Transport } = require("tone");
 import Composition from "./components/composer/Composition";
 import Controller from "./components/controller/Controller";
 import Keyboard from "./components/dom/Keyboard";
@@ -9,6 +7,7 @@ import { Intervals } from "./components/dom/Intervals";
 import { RootType, ModeType } from "./types/index";
 import accidentals from "./util/accidentals";
 
+const { context, Gain, Synth, Transport } = window.Tone;
 console.clear();
 
 document.documentElement.addEventListener("mousedown", () => {
