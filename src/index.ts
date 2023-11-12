@@ -114,18 +114,18 @@ function initialize() {
     new AMSynth({ oscillator: { type: "sawtooth4" } }),
   ];
   const channels = [
-    new Gain(0.15),
-    new Gain(0.15),
-    new Gain(0.15),
-    new Gain(0.8),
+    new Gain(0.2),
+    new Gain(0.2),
+    new Gain(0.2),
+    new Gain(0.85),
   ];
   const output = new Gain();
   lead1 = new AMSynth();
   lead2 = new AMSynth();
   lead1.set({ oscillator: { type: "sawtooth4" }, portamento: 0.5 });
   lead2.set({ oscillator: { type: "sawtooth4" }, portamento: 0.6 });
-  const lead1Gain = new Gain(0.2);
-  const lead2Gain = new Gain(0.2);
+  const lead1Gain = new Gain(0.3);
+  const lead2Gain = new Gain(0.3);
   lead1.connect(lead1Gain);
   lead2.connect(lead2Gain);
   lead1Gain.connect(output);
