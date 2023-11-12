@@ -1,28 +1,47 @@
 // http://aaron.headwai.com/ra/MIDI/MIDI%20Message%20Table%201.pdf
 // https://www.midi.org/specifications-old/item/table-2-expanded-messages-list-status-bytes
+
+interface EventData {
+  value: number | null;
+  ratio: number | null;
+  type: string | null;
+}
+
 export class MIDIEvent {
-  constructor(face, data) {
+  device: Partial<MIDIPort>;
+  a: EventData;
+  b: EventData;
+  type: string;
+
+  constructor(device: MIDIPort, event: MIDIMessageEvent) {
     this.device = {
-      type: face.type,
-      id: face.id,
-      manufacturer: face.manufacturer,
-      name: face.name,
+      id: device.id,
+      type: device.type,
+      name: device.name,
+      connection: device.connection,
+      manufacturer: device.manufacturer,
+      state: device.state,
+      version: device.version,
+      close: device.close,
+      open: device.open,
     };
-    if (data) {
-      const { type, a, b } = MIDIEvent.describedValuesFromData(data);
+    if (event?.data) {
+      const { type, a, b } = MIDIEvent.describedValuesFromData(event.data);
       this.type = type;
       this.a = a;
       this.b = b;
     } else {
       this.type = MIDIEvent.toType(
-        face.state === "connected" ? "Device Connected" : "Device Disconnected"
+        device.state === "connected"
+          ? "Device Connected"
+          : "Device Disconnected"
       );
       this.a = null;
       this.b = null;
     }
   }
 
-  static toType(string) {
+  static toType(string: string) {
     if (!string) return string;
     return string
       .replace(/[^\w\d]/, " ")
@@ -31,12 +50,19 @@ export class MIDIEvent {
       .toLowerCase();
   }
 
-  static describedData(data, name, label1, label2) {
+  static describedData(
+    data: Uint8Array,
+    name: string,
+    label1?: string,
+    label2?: string
+  ) {
     const [func, byte1, byte2] = data;
     const channel = func >= 128 && func <= 239 ? (func % 16) + 1 : 0;
-    const value = (val) => (typeof val === "number" ? val : null);
-    const ratio = (val) => (typeof val === "number" ? val / 127 : null);
-    const string = (val) => val || null;
+    const value = (val?: number): number | null =>
+      typeof val === "number" ? val : null;
+    const ratio = (val?: number): number | null =>
+      typeof val === "number" ? val / 127 : null;
+    const string = (val?: string): string | null => val || null;
     return {
       channel,
       type: MIDIEvent.toType(name),
@@ -53,61 +79,75 @@ export class MIDIEvent {
     };
   }
 
-  static describedValuesFromData(data) {
+  static describedValuesFromData(data: Uint8Array) {
     const [func, byte1] = data;
-    const fn = MIDIEvent.describedData;
     if (func >= 128 && func <= 143)
-      return fn(data, "Note Off", "Note", "Velocity");
+      return MIDIEvent.describedData(data, "Note Off", "Note", "Velocity");
     else if (func >= 144 && func <= 159)
-      return fn(data, "Note On", "Note", "Velocity");
+      return MIDIEvent.describedData(data, "Note On", "Note", "Velocity");
     else if (func >= 160 && func <= 175)
-      return fn(data, "Polyphonic Aftertouch", "Note", "Pressure");
+      return MIDIEvent.describedData(
+        data,
+        "Polyphonic Aftertouch",
+        "Note",
+        "Pressure"
+      );
     else if (func >= 176 && func <= 191)
-      return fn(data, "Mode Change", "Mode", MIDIEvent.modeLabel(byte1));
+      return MIDIEvent.describedData(
+        data,
+        "Mode Change",
+        "Mode",
+        MIDIEvent.modeLabel(byte1)
+      );
     else if (func >= 192 && func <= 207)
-      return fn(data, "Program Change", "Program");
+      return MIDIEvent.describedData(data, "Program Change", "Program");
     else if (func >= 208 && func <= 223)
-      return fn(data, "Aftertouch", "Pressure");
+      return MIDIEvent.describedData(data, "Aftertouch", "Pressure");
     else if (func >= 224 && func <= 239)
-      return fn(data, "Pitch Wheel Control", "LSB", "MSB");
+      return MIDIEvent.describedData(data, "Pitch Wheel Control", "LSB", "MSB");
     else
       switch (func) {
         case 240:
-          return fn(data, "System Exclusive");
+          return MIDIEvent.describedData(data, "System Exclusive");
         case 241:
-          return fn(data, "MIDI Time Code Qtr. Frame");
+          return MIDIEvent.describedData(data, "MIDI Time Code Qtr. Frame");
         case 242:
-          return fn(data, "Song Position Pointer", "LSB", "MSB");
+          return MIDIEvent.describedData(
+            data,
+            "Song Position Pointer",
+            "LSB",
+            "MSB"
+          );
         case 243:
-          return fn(data, "Song Select", "Song #");
+          return MIDIEvent.describedData(data, "Song Select", "Song #");
         case 244:
-          return fn(data, "Unspecified (Reserved)");
+          return MIDIEvent.describedData(data, "Unspecified (Reserved)");
         case 245:
-          return fn(data, "Unspecified (Reserved)");
+          return MIDIEvent.describedData(data, "Unspecified (Reserved)");
         case 246:
-          return fn(data, "Tune request'");
+          return MIDIEvent.describedData(data, "Tune request'");
         case 247:
-          return fn(data, "End of SysEx (EOX)");
+          return MIDIEvent.describedData(data, "End of SysEx (EOX)");
         case 248:
-          return fn(data, "Timing clock");
+          return MIDIEvent.describedData(data, "Timing clock");
         case 249:
-          return fn(data, "Unspecified (Reserved)");
+          return MIDIEvent.describedData(data, "Unspecified (Reserved)");
         case 250:
-          return fn(data, "Start");
+          return MIDIEvent.describedData(data, "Start");
         case 251:
-          return fn(data, "Continue");
+          return MIDIEvent.describedData(data, "Continue");
         case 252:
-          return fn(data, "Stop");
+          return MIDIEvent.describedData(data, "Stop");
         case 253:
-          return fn(data, "Unspecified (Reserved)");
+          return MIDIEvent.describedData(data, "Unspecified (Reserved)");
         case 254:
-          return fn(data, "Active Sensing");
+          return MIDIEvent.describedData(data, "Active Sensing");
         case 255:
-          return fn(data, "System Reset");
+          return MIDIEvent.describedData(data, "System Reset");
       }
   }
 
-  static modeLabel(byte1) {
+  static modeLabel(byte1: number) {
     return [
       "Bank Select",
       "Modulation Wheel or Lever",
@@ -242,71 +282,88 @@ export class MIDIEvent {
 }
 
 export class MIDI {
-  constructor(onEvent = (MIDIEvent) => { }) {
+  inputs: { [k: string]: MIDIPort };
+  outputs: { [k: string]: MIDIPort };
+  onEvent: (event: MIDIEvent) => void;
+
+  constructor(onEvent = (event: MIDIEvent) => {}) {
     this.inputs = {};
     this.outputs = {};
     this.onEvent = onEvent;
   }
 
-  initialize() {
-    return new Promise((resolve, reject) => {
-      navigator
-        .requestMIDIAccess()
-        .then((access) => {
-          const inputs = access.inputs.values();
-          const outputs = access.outputs.values();
+  async initialize() {
+    const access = await navigator.requestMIDIAccess();
+    const inputs = access.inputs.values();
+    const outputs = access.outputs.values();
+    for (const input of inputs) this.initializeInput(input);
+    for (const output of outputs) this.initializeOutput(output);
 
-          for (const input of inputs) this.initializeInput(input);
-          for (const output of outputs) this.initializeOutput(output);
-
-          access.addEventListener("statechange", ({ port }) => {
-            if (port.type === "input") {
-              if (port.state === "connected") this.initializeInput(port);
-              else this.teardownInput(port);
-            } else {
-              if (port.state === "connected") this.initializeOutput(port);
-              else this.teardownOutput(port);
-            }
-          });
-          resolve();
-        })
-        .catch(reject);
+    access.addEventListener("statechange", (event: MIDIConnectionEvent) => {
+      console.log(event);
+      const { port } = event;
+      if (port.type === "input") {
+        if (port.state === "connected") this.initializeInput(port);
+        else this.teardownInput(port);
+      } else {
+        if (port.state === "connected") this.initializeOutput(port);
+        else this.teardownOutput(port);
+      }
     });
+
+    return;
   }
 
-  notify(message, name) {
+  notify(message: Uint8Array, name: string) {
     Object.values(this.outputs).forEach((output) => {
-      if (output.name === name || !name) output.send(message);
+      if (portIsOutput(output) && (output.name === name || !name)) {
+        console.log(
+          "sending",
+          name,
+          output,
+          MIDIEvent.describedValuesFromData(message)
+        );
+        output.send(message);
+      }
     });
   }
 
-  initializeInput(input) {
+  initializeInput(input: MIDIPort) {
     if (this.inputs[input.id]) return;
     this.sendEvent(input);
     this.inputs[input.id] = input;
-    input.addEventListener("midimessage", ({ data }) =>
-      this.sendEvent(input, data)
-    );
+    input.addEventListener("midimessage", (event: MIDIMessageEvent) => {
+      console.log(event);
+      this.sendEvent(input, event);
+    });
   }
 
-  initializeOutput(output) {
+  initializeOutput(output: MIDIPort) {
     this.sendEvent(output);
     this.outputs[output.id] = output;
   }
 
-  teardownInput(input) {
+  teardownInput(input: MIDIPort) {
     if (!this.inputs[input.id]) return;
     this.sendEvent(input);
     delete this.inputs[input.id];
   }
 
-  teardownOutput(output) {
+  teardownOutput(output: MIDIPort) {
     if (!this.outputs[output.id]) return;
     this.sendEvent(output);
     delete this.outputs[output.id];
   }
 
-  sendEvent(device, data) {
-    this.onEvent(new MIDIEvent(device, data));
+  sendEvent(port: MIDIPort, event?: MIDIMessageEvent) {
+    this.onEvent(new MIDIEvent(port, event));
   }
+}
+
+function portIsInput(port: MIDIPort): port is MIDIInput {
+  return port.type === "input";
+}
+
+function portIsOutput(port: MIDIPort): port is MIDIOutput {
+  return port.type === "output";
 }
