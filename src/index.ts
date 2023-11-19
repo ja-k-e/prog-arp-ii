@@ -1,5 +1,3 @@
-import "./image.png";
-import "./icon.png";
 import Composition from "./components/composer/Composition";
 import Controller from "./components/controller/Controller";
 import { MIDI, MIDIEvent } from "./components/controller/MIDI";

@@ -7,8 +7,18 @@
     "start": "parcel",
     "build": "parcel build"
   },
+  "parcel-namer-rewrite": {
+    "chain": "@parcel/namer-default",
+    "hashing": "always",
+    "rules": {
+      "(.*).png": "$1.png",
+      "(.*).css": "$1.{hash}.css",
+      "(.*).js": "$1.{hash}.js"
+    }
+  },
   "devDependencies": {
-    "parcel": "^2.10.2",
+    "parcel": "^2.10.3",
+    "parcel-namer-rewrite": "^2.10.3-rc.1",
     "typescript": "^3.7.5"
   }
 }
