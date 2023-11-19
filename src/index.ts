@@ -80,9 +80,7 @@ function sendMidiMessage(interval: number, onOrOff: "on" | "off") {
   a[0] = 144;
   a[1] = interval + 36;
   a[2] = onOrOff === "on" ? 127 : 0;
-  // setTimeout(() => {
   midi.notifyAll(a);
-  // }, 10);
 }
 
 function updateInterval(interval: number): void {
@@ -98,6 +96,7 @@ function updateInterval(interval: number): void {
     sendMidiMessage(interval, "on");
   } else if (interval === last) {
     Transport.stop();
+    arp.step = 0;
     setTimeout(clear, 50);
     last = null;
     lead1.triggerRelease();
