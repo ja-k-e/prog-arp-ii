@@ -81,8 +81,7 @@ function sendMidiMessage(interval: number, onOrOff: "on" | "off") {
   a[1] = interval + 36;
   a[2] = onOrOff === "on" ? 127 : 0;
   // setTimeout(() => {
-  midi.notify(a, "MPD218 Port A");
-  midi.notify(a, "MPK mini 3");
+  midi.notifyAll(a);
   // }, 10);
 }
 

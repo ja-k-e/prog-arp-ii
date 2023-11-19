@@ -314,6 +314,14 @@ export class MIDI {
     return;
   }
 
+  notifyAll(message: Uint8Array) {
+    Object.values(this.outputs).forEach((output) => {
+      if (portIsOutput(output)) {
+        output.send(message);
+      }
+    });
+  }
+
   notify(message: Uint8Array, name: string) {
     Object.values(this.outputs).forEach((output) => {
       if (portIsOutput(output) && (output.name === name || !name)) {
