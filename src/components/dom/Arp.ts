@@ -13,14 +13,14 @@ export default class Arp {
       container.querySelector("#arp-0"),
       container.querySelector("#arp-1"),
       container.querySelector("#arp-2"),
-      container.querySelector("#arp-3")
+      container.querySelector("#arp-3"),
     ];
     this.pattern = [
       [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 2, 0],
       [0, 1, 0, 2, 0, 1, 0, 1, 0, 2, 0, 2],
       [1, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0],
       // bass
-      [1, 0, 1, 0, 2, 0, 1, 0, 2, 1, 0, 1]
+      [1, 0, 1, 0, 2, 0, 1, 0, 2, 1, 0, 1],
     ];
     this.step = 0;
     this.length = 12;
@@ -33,7 +33,7 @@ export default class Arp {
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       // bass
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ];
     this.updateDOM();
   }
@@ -43,11 +43,11 @@ export default class Arp {
     const row = [];
     for (let i = 0; i < 12; i++) row.push(Math.random() > 0.1 ? r() : 9);
     this.pattern = [
-      row.map(a => (a === 0 ? (Math.random() > 0.5 ? 1 : 2) : 0)),
-      row.map(a => (a === 1 ? (Math.random() > 0.5 ? 1 : 2) : 0)),
-      row.map(a => (a === 2 ? (Math.random() > 0.5 ? 1 : 2) : 0)),
+      row.map((a) => (a === 0 ? (Math.random() > 0.5 ? 1 : 2) : 0)),
+      row.map((a) => (a === 1 ? (Math.random() > 0.5 ? 1 : 2) : 0)),
+      row.map((a) => (a === 2 ? (Math.random() > 0.5 ? 1 : 2) : 0)),
       // bass
-      [r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r()]
+      [r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
     ];
     this.updateDOM();
   }
@@ -84,7 +84,7 @@ export default class Arp {
 
   tick(interval: Interval) {
     const i = this.step % this.length;
-    const [n0, n1, n2, n3] = this.pattern.map(r => r[i]);
+    const [n0, n1, n2, n3] = this.pattern.map((r) => r[i]);
     const { notes } = interval.triad;
     this.container.className = `active-${i + 1}`;
     this.step++;
@@ -92,7 +92,8 @@ export default class Arp {
       n0 ? `${notes[2].note.name}${notes[2].octave + n0 + 3}` : null,
       n1 ? `${notes[1].note.name}${notes[1].octave + n1 + 3}` : null,
       n2 ? `${notes[0].note.name}${notes[0].octave + n2 + 3}` : null,
-      n3 ? `${notes[0].note.name}${notes[0].octave + n3 + 0}` : null
+      n3 ? `${notes[0].note.name}${notes[0].octave + n3 + 0}` : null,
+      n3 ? `${notes[0].note.name}${notes[0].octave + n3 + 1}` : null,
     ];
   }
 }

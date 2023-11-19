@@ -14,6 +14,7 @@ async function initialize() {
   message[1] = 36;
   message[2] = 127;
   midi.notify(message, "MPK mini 3");
+  midi.notify(message, "MPD218 Port A");
   function onMidiEvent(event: MIDIEvent) {
     // console.log(event.type, event);
   }

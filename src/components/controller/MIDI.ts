@@ -317,12 +317,12 @@ export class MIDI {
   notify(message: Uint8Array, name: string) {
     Object.values(this.outputs).forEach((output) => {
       if (portIsOutput(output) && (output.name === name || !name)) {
-        console.log(
-          "sending",
-          name,
-          output,
-          MIDIEvent.describedValuesFromData(message)
-        );
+        // console.log(
+        //   "sending",
+        //   name,
+        //   output,
+        //   MIDIEvent.describedValuesFromData(message)
+        // );
         output.send(message);
       }
     });
@@ -333,7 +333,7 @@ export class MIDI {
     this.sendEvent(input);
     this.inputs[input.id] = input;
     input.addEventListener("midimessage", (event: MIDIMessageEvent) => {
-      console.log(event);
+      // console.log(event);
       this.sendEvent(input, event);
     });
   }

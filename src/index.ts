@@ -1,3 +1,5 @@
+import "./image.png";
+import "./icon.png";
 import Composition from "./components/composer/Composition";
 import Controller from "./components/controller/Controller";
 import { MIDI, MIDIEvent } from "./components/controller/MIDI";
@@ -10,7 +12,7 @@ import accidentals from "./util/accidentals";
 
 console.clear();
 
-const { context, Gain, AMSynth, FMSynth, Transport } = window.Tone;
+const { context, Gain, AMSynth, FMSynth, Panner, Transport } = window.Tone;
 const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 document.documentElement.addEventListener("mousedown", () => {
@@ -50,9 +52,11 @@ let initialized = false;
 let currentInterval = 0;
 let last: number | null = null;
 let leadOn = false;
+let leadStarted = false;
 let noteIdx = 0;
 let lead1: typeof AMSynth | undefined;
 let lead2: typeof AMSynth | undefined;
+let lead3: typeof AMSynth | undefined;
 
 const midi = new MIDI(onMidiEvent);
 midi.initialize().then(() => console.log("MIDI Initialized"));
@@ -71,6 +75,17 @@ function updateTitle() {
   $title.innerHTML = `${accidentals(n)} ${scale.name}`;
 }
 
+function sendMidiMessage(interval: number, onOrOff: "on" | "off") {
+  const a = new Uint8Array(3);
+  a[0] = 144;
+  a[1] = interval + 36;
+  a[2] = onOrOff === "on" ? 127 : 0;
+  // setTimeout(() => {
+  midi.notify(a, "MPD218 Port A");
+  midi.notify(a, "MPK mini 3");
+  // }, 10);
+}
+
 function updateInterval(interval: number): void {
   if (!initialized) initialize();
   if (last === null) {
@@ -78,17 +93,24 @@ function updateInterval(interval: number): void {
     last = interval;
     lead1.triggerRelease();
     lead2.triggerRelease();
+    lead3.triggerRelease();
     leadOn = false;
+    leadStarted = false;
+    sendMidiMessage(interval, "on");
   } else if (interval === last) {
     Transport.stop();
     setTimeout(clear, 50);
     last = null;
     lead1.triggerRelease();
     lead2.triggerRelease();
+    lead3.triggerRelease();
     leadOn = false;
+    leadStarted = false;
+    sendMidiMessage(interval, "off");
   } else {
+    sendMidiMessage(last, "off");
     last = interval;
-    lead2Update();
+    sendMidiMessage(interval, "on");
   }
   currentInterval = interval;
   intervals.handleActiveIntervalChange(currentInterval);
@@ -112,26 +134,59 @@ function initialize() {
     new AMSynth({ oscillator: { type: "triangle4" } }),
     new AMSynth({ oscillator: { type: "triangle4" } }),
     new AMSynth({ oscillator: { type: "sawtooth4" } }),
+    new AMSynth({ oscillator: { type: "sawtooth4" } }),
   ];
   const channels = [
-    new Gain(0.2),
-    new Gain(0.2),
-    new Gain(0.2),
-    new Gain(0.85),
+    new Gain(0.6),
+    new Gain(0.6),
+    new Gain(0.6),
+    new Gain(1),
+    new Gain(1),
+  ];
+  const pans = [
+    new Panner(-1),
+    new Panner(0.1),
+    new Panner(1),
+    new Panner(-0.5),
+    new Panner(0.5),
   ];
   const output = new Gain();
   lead1 = new AMSynth();
   lead2 = new AMSynth();
-  lead1.set({ oscillator: { type: "sawtooth4" }, portamento: 0.5 });
-  lead2.set({ oscillator: { type: "sawtooth4" }, portamento: 0.6 });
-  const lead1Gain = new Gain(0.3);
-  const lead2Gain = new Gain(0.3);
-  lead1.connect(lead1Gain);
-  lead2.connect(lead2Gain);
+  lead3 = new AMSynth();
+  lead1.set({
+    oscillator: { type: "sine2" },
+    envelope: { attack: 0.005 },
+    portamento: 0.5,
+  });
+  lead2.set({
+    oscillator: { type: "sawtooth2" },
+    envelope: { attack: 0.005 },
+    portamento: 0.6,
+  });
+  lead3.set({
+    oscillator: { type: "sawtooth2" },
+    envelope: { attack: 0.005 },
+    portamento: 0.6,
+  });
+  const lead1Gain = new Gain(0.35);
+  const lead2Gain = new Gain(0.2);
+  const lead3Gain = new Gain(0.2);
+  const lead1Panner = new Panner(0.1);
+  const lead2Panner = new Panner(-0.6);
+  const lead3Panner = new Panner(0.6);
+  lead1.connect(lead1Panner);
+  lead2.connect(lead2Panner);
+  lead3.connect(lead3Panner);
+  lead1Panner.connect(lead1Gain);
+  lead2Panner.connect(lead2Gain);
+  lead3Panner.connect(lead3Gain);
   lead1Gain.connect(output);
   lead2Gain.connect(output);
+  lead3Gain.connect(output);
   synths.forEach((synth, i) => {
-    synth.connect(channels[i]);
+    synth.connect(pans[i]);
+    pans[i].connect(channels[i]);
     channels[i].connect(output);
   });
   output.toDestination();
@@ -140,6 +195,8 @@ function initialize() {
     const interval = composition.intervals[currentInterval];
     const notes = arp.tick(interval);
     keyboard.tick(interval.triad.notes);
+    sendMidiMessage(currentInterval, "on");
+    leadsUpdate();
     notes.forEach((note, i) => {
       if (note) synths[i].triggerAttackRelease(note, "16n", time);
     });
@@ -159,10 +216,12 @@ function onMidiEvent({ type, a, b }: MIDIEvent) {
       noteIdx = index % 12;
       const note = notes[noteIdx];
       const octave = 3 + Math.floor(index / 12);
-      lead2Update();
       if (leadOn) {
         lead1.setNote(`${note}${octave}`);
+        leadsUpdate();
       } else {
+        leadStarted = true;
+        leadsUpdate();
         leadOn = true;
         lead1.triggerAttack(`${note}${octave}`);
       }
@@ -170,19 +229,24 @@ function onMidiEvent({ type, a, b }: MIDIEvent) {
   }
 }
 
-function lead2Update() {
-  const index = composition.intervals[currentInterval].triad.notes
+function leadsUpdate() {
+  const sorted = composition.intervals[currentInterval].triad.notes
     .map(({ note: { name } }) => {
       const i = notes.indexOf(name);
       return [i, Math.abs(noteIdx - i)];
     })
-    .sort((a, b) => b[1] - a[1])[0][0];
-  const note = notes[index];
-  const octave = 3;
+    .sort((a, b) => (b[1] === a[1] ? a[0] - b[0] : b[1] - a[1]))
+    .map((a) => a[0]);
+  const note1 = notes[sorted[0]];
+  const note2 = notes[sorted[1]];
+  const octave1 = 5;
+  const octave2 = 5;
   if (leadOn) {
-    lead2.setNote(`${note}${octave}`);
-  } else {
-    lead2.triggerAttack(`${note}${octave}`);
+    lead2.setNote(`${note1}${octave1}`);
+    lead3.setNote(`${note2}${octave2}`);
+  } else if (leadStarted) {
+    lead2.triggerAttack(`${note1}${octave1}`);
+    lead3.triggerAttack(`${note2}${octave2}`);
   }
 }
 
